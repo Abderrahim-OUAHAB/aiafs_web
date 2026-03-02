@@ -98,9 +98,11 @@ def predict_future_levels_from_history(raw_history: pd.DataFrame) -> List[Dict[s
     Random Forest pour prédire 5 niveaux futurs.
 
     On part de l'hypothèse:
-      - le modèle est un modèle "un pas" (forecast_horizon=1 dans le notebook)
-      - on itère 5 fois pour obtenir 5 pas futurs
-      - chaque pas est présenté comme +1h dans le temps côté API
+      - le modèle est un modèle "un pas" (forecast_horizon=1 dans le notebook),
+        donc il prédit le niveau au prochain pas de temps (un pas = intervalle
+        réel entre deux mesures de la base, typiquement 6 minutes).
+      - on itère jusqu'à atteindre un horizon de 5 heures en avant, et on
+        extrait les niveaux prédits toutes les heures (T+1h, T+2h, ..., T+5h).
     """
     if model is None:
         raise RuntimeError("Le modèle n'a pas pu être chargé.")
@@ -111,26 +113,63 @@ def predict_future_levels_from_history(raw_history: pd.DataFrame) -> List[Dict[s
     if "date_mesure" not in raw_history.columns:
         raise ValueError("La colonne 'date_mesure' est manquante dans l'historique.")
 
-    # Timestamp de la dernière observation existante
-    last_timestamp = pd.to_datetime(raw_history["date_mesure"].max())
+    # Historique que l'on va enrichir au fur et à mesure avec les prédictions
+    history = raw_history.copy()
+    history["date_mesure"] = pd.to_datetime(history["date_mesure"])
+    history = history.sort_values("date_mesure")
 
-    # On construit une ligne de features à partir de l'historique récent
-    X_last = _build_feature_row_from_history(raw_history)
+    last_timestamp = history["date_mesure"].max()
 
-    # On duplique cette même ligne pour générer 5 prédictions successives
-    X_future = pd.concat([X_last] * 5, ignore_index=True)
-
-    y_pred = model.predict(X_future)
+    # Pas de temps réel entre deux mesures (dernier intervalle observé).
+    # Si on ne parvient pas à l'estimer, on utilise un fallback de 6 minutes.
+    timestamps = history["date_mesure"].dropna().sort_values()
+    if len(timestamps) >= 2:
+        step_delta = timestamps.iloc[-1] - timestamps.iloc[-2]
+    else:
+        step_delta = pd.Timedelta(minutes=6)
 
     predictions: List[Dict[str, Any]] = []
-    for i in range(5):
-        future_timestamp = last_timestamp + pd.Timedelta(hours=i + 1)
-        predictions.append(
-            {
-                "timestamp": future_timestamp.isoformat(),
-                "predicted_niveau_cours_eau_m": float(y_pred[i]),
-            }
-        )
+
+    # Nombre de pas de temps approximatifs par heure
+    try:
+        steps_per_hour = int(round(pd.Timedelta(hours=1) / step_delta))
+    except Exception:
+        steps_per_hour = 10
+    if steps_per_hour < 1:
+        steps_per_hour = 1
+
+    total_steps = steps_per_hour * 5  # horizon total ~5h
+
+    for step in range(1, total_steps + 1):
+        # 1) Construire les features à partir de l'historique courant
+        X_last = _build_feature_row_from_history(history)
+
+        # 2) Prédire le niveau futur à partir de ces features
+        y_next = float(model.predict(X_last)[0])
+
+        future_timestamp = last_timestamp + step_delta
+
+        # 3) Si on vient d'atteindre un multiple d'une heure, on enregistre la prédiction
+        if step % steps_per_hour == 0:
+            predictions.append(
+                {
+                    "timestamp": future_timestamp.isoformat(),
+                    "predicted_niveau_cours_eau_m": y_next,
+                }
+            )
+
+        # 4) Ajouter ce point prédit dans l'historique pour que les lags
+        #    et moyennes roulantes des étapes suivantes l'utilisent
+        last_row = history.sort_values("date_mesure").iloc[-1].copy()
+        last_row["date_mesure"] = future_timestamp
+        last_row["niveau_cours_eau_m"] = y_next
+
+        history = pd.concat([history, last_row.to_frame().T], ignore_index=True)
+        history["date_mesure"] = pd.to_datetime(history["date_mesure"])
+        history = history.sort_values("date_mesure")
+
+        # On avance la référence temporelle pour la prochaine itération
+        last_timestamp = future_timestamp
 
     return predictions
 

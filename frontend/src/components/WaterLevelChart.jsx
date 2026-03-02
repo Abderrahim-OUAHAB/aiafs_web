@@ -20,6 +20,11 @@ function formatTimeLabel(isoString) {
   });
 }
 
+function formatLevelTick(value) {
+  if (typeof value !== "number" || Number.isNaN(value)) return "";
+  return value.toFixed(3);
+}
+
 const CustomTooltip = ({ active, payload, label }) => {
   if (!active || !payload || payload.length === 0) return null;
 
@@ -40,13 +45,13 @@ const CustomTooltip = ({ active, payload, label }) => {
       {real && real.value != null && (
         <p className="text-sky-200">
           Niveau observé :{" "}
-          <span className="font-semibold">{real.value.toFixed(2)} m</span>
+          <span className="font-semibold">{real.value.toFixed(3)} m</span>
         </p>
       )}
       {pred && pred.value != null && (
         <p className="text-red-300">
           Niveau prédit :{" "}
-          <span className="font-semibold">{pred.value.toFixed(2)} m</span>
+          <span className="font-semibold">{pred.value.toFixed(3)} m</span>
         </p>
       )}
     </div>
@@ -83,9 +88,13 @@ export default function WaterLevelChart({ observations, predictions }) {
   const minValue = allValues.length ? Math.min(...allValues) : 0;
   const maxValue = allValues.length ? Math.max(...allValues) : 1;
 
+  // On arrondit l'échelle à 3 décimales pour éviter les valeurs bizarres (0.209999999...)
+  const roundedMin = Math.floor(minValue * 1000) / 1000;
+  const roundedMax = Math.ceil(maxValue * 1000) / 1000;
+
   // On ajoute une petite marge autour des valeurs min / max pour mieux voir les variations
-  const margin = (maxValue - minValue) * 0.15 || 0.02;
-  const yDomain = [minValue - margin, maxValue + margin];
+  const margin = (roundedMax - roundedMin) * 0.15 || 0.002;
+  const yDomain = [roundedMin - margin, roundedMax + margin];
 
   return (
     <div className="rounded-xl bg-aiafs-panel/80 border border-slate-700 p-4 shadow-lg">
@@ -107,6 +116,8 @@ export default function WaterLevelChart({ observations, predictions }) {
               stroke="#9ca3af"
               tick={{ fontSize: 10 }}
               domain={yDomain}
+              tickFormatter={formatLevelTick}
+              allowDecimals
               label={{
                 value: "Niveau (m)",
                 angle: -90,
@@ -127,21 +138,21 @@ export default function WaterLevelChart({ observations, predictions }) {
 
             <Line
               type="monotone"
-              dataKey="predictedLevel"
-              stroke="#ef4444"
-              strokeWidth={3}
-              dot={{ r: 3 }}
-              strokeDasharray="5 5"
-              name="Niveau prédit"
-            />
-
-            <Line
-              type="monotone"
               dataKey="historicalLevel"
               stroke="#38bdf8"
               strokeWidth={1.5}
               dot={false}
               name="Niveau observé"
+            />
+
+            <Line
+              type="monotone"
+              dataKey="predictedLevel"
+              stroke="#ef4444"
+              strokeWidth={2.5}
+              dot={false}
+              strokeDasharray="4 4"
+              name="Niveau prédit"
             />
 
             <ReferenceLine
