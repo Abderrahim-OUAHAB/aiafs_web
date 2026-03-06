@@ -2,6 +2,7 @@ import React from "react";
 import WaterLevelChart from "./WaterLevelChart.jsx";
 import AlertPanel from "./AlertPanel.jsx";
 import ForecastDetails from "./ForecastDetails.jsx";
+import ValvePiloting from "./ValvePiloting.jsx";
 
 export default function Dashboard({
   observations,
@@ -9,6 +10,8 @@ export default function Dashboard({
   lastUpdate,
   isLoading,
   error,
+  timeRange,
+  setTimeRange,
 }) {
   const currentLevel =
     observations && observations.length > 0
@@ -74,6 +77,8 @@ export default function Dashboard({
               <WaterLevelChart
                 observations={observations}
                 predictions={predictions}
+                timeRange={timeRange}
+                setTimeRange={setTimeRange}
               />
             </div>
             <div className="lg:col-span-1">
@@ -87,6 +92,11 @@ export default function Dashboard({
           {/* Forecast Details */}
           <div>
             <ForecastDetails predictions={predictions} />
+          </div>
+
+          {/* Pilotage des Vannes */}
+          <div>
+            <ValvePiloting />
           </div>
         </div>
       </main>

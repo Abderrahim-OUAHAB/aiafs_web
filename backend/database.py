@@ -6,11 +6,18 @@ DB_CONFIG = {
     'host': 'localhost',
     'database': 'aiafs_db',
     'user': 'postgres',
-    'password': 'wahhab',
+    'password': 'root',
     'port': '5432'
 }
 
 TABLE_NAME = "donnees_modele_1"
+
+RANGE_INTERVALS = {
+    "1h": "1 hour",
+    "6h": "6 hours",
+    "1d": "1 day",
+    "1w": "7 days",
+}
 
 
 def connect_to_postgresql():
@@ -29,43 +36,36 @@ def connect_to_postgresql():
         return None
 
 
-def get_latest_observations(limit: int = 200) -> pd.DataFrame:
+def get_latest_observations(limit: int = 500, time_range: str = "all") -> pd.DataFrame:
     """
-    Récupère les dernières observations brutes depuis la table,
-    triées par date_mesure croissante.
-
-    AUCUN traitement supplémentaire n'est appliqué.
+    Récupère les observations les plus récentes.
+    time_range: "1h", "6h", "1d", "1w", "all"
     """
     engine = connect_to_postgresql()
     if engine is None:
         raise RuntimeError("Impossible de se connecter à PostgreSQL.")
-    '''
-    query = f"""
-        SELECT
-            date_mesure,
-            debit_cours_eau_m3s,
-            niveau_cours_eau_m,
-            precipitation,
-            maree
-        FROM {TABLE_NAME}
-        ORDER BY date_mesure DESC
-        LIMIT {limit}
-    """
-    '''
-    query = f"""
-    SELECT
-        date_mesure,
-        debit_cours_eau_m3s,
-        niveau_cours_eau_m,
-        precipitation,
-        maree
-    FROM {TABLE_NAME}
-    WHERE date_mesure BETWEEN '2026-01-13' AND '2026-01-16'
-    ORDER BY date_mesure ASC
-    """
+
+    if time_range in RANGE_INTERVALS:
+        interval = RANGE_INTERVALS[time_range]
+        query = f"""
+            SELECT date_mesure, debit_cours_eau_m3s, niveau_cours_eau_m, precipitation, maree
+            FROM {TABLE_NAME}
+            WHERE date_mesure >= (SELECT MAX(date_mesure) FROM {TABLE_NAME}) - INTERVAL '{interval}'
+            ORDER BY date_mesure ASC
+        """
+    else:
+        query = f"""
+            SELECT date_mesure, debit_cours_eau_m3s, niveau_cours_eau_m, precipitation, maree
+            FROM (
+                SELECT date_mesure, debit_cours_eau_m3s, niveau_cours_eau_m, precipitation, maree
+                FROM {TABLE_NAME}
+                ORDER BY date_mesure DESC
+                LIMIT {int(limit)}
+            ) sub
+            ORDER BY date_mesure ASC
+        """
 
     df = pd.read_sql(query, con=engine)
-    # On réinverse pour avoir du plus ancien au plus récent dans l'API
     df = df.sort_values("date_mesure").reset_index(drop=True)
     return df
 
