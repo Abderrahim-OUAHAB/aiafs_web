@@ -1,6 +1,7 @@
 import React from "react";
 import WaterLevelChart from "./WaterLevelChart.jsx";
 import AlertPanel from "./AlertPanel.jsx";
+import ForecastDetails from "./ForecastDetails.jsx";
 
 export default function Dashboard({
   observations,
@@ -59,14 +60,15 @@ export default function Dashboard({
         </div>
       </header>
 
-      <main className="flex-1">
-        <div className="max-w-6xl mx-auto px-4 py-6 space-y-6">
+      <main className="flex-1 bg-gradient-to-b from-slate-950 via-slate-950 to-slate-900">
+        <div className="max-w-7xl mx-auto px-4 py-8 space-y-6">
           {error && (
-            <div className="rounded-lg border border-red-500/60 bg-red-950/40 text-red-200 text-sm px-4 py-3">
+            <div className="rounded-lg border border-red-500/60 bg-red-950/40 text-red-200 text-sm px-4 py-3 backdrop-blur-sm">
               {error}
             </div>
           )}
 
+          {/* Main chart and alert panel */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2">
               <WaterLevelChart
@@ -80,6 +82,11 @@ export default function Dashboard({
                 maxPredicted={maxPredicted}
               />
             </div>
+          </div>
+
+          {/* Forecast Details */}
+          <div>
+            <ForecastDetails predictions={predictions} />
           </div>
         </div>
       </main>

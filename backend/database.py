@@ -60,7 +60,7 @@ def get_latest_observations(limit: int = 200) -> pd.DataFrame:
         precipitation,
         maree
     FROM {TABLE_NAME}
-    WHERE date_mesure BETWEEN '2026-01-13' AND '2026-01-30'
+    WHERE date_mesure BETWEEN '2026-01-13' AND '2026-01-16'
     ORDER BY date_mesure ASC
     """
 
