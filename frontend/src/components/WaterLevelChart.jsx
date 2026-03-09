@@ -39,7 +39,7 @@ function formatAxisLabel(isoString, range) {
 
 function formatLevelTick(value) {
   if (typeof value !== "number" || Number.isNaN(value)) return "";
-  return value.toFixed(3);
+  return value.toFixed(4);
 }
 
 /* ─── Tooltip ─── */
@@ -54,16 +54,16 @@ const CustomTooltip = ({ active, payload, label }) => {
   const real = payload.find((p) => p.dataKey === "historicalLevel");
   const pred = payload.find((p) => p.dataKey === "predictedLevel");
   return (
-    <div className="bg-slate-900/95 border border-slate-700 rounded-lg px-3 py-2 text-xs text-gray-100 shadow-xl">
-      <p className="font-semibold text-sky-300 mb-1">{dateStr}</p>
+    <div className="bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-800 shadow-lg">
+      <p className="font-semibold text-blue-600 mb-1">{dateStr}</p>
       {real && real.value != null && (
-        <p className="text-sky-200">
-          Niveau observé : <span className="font-semibold">{real.value.toFixed(3)} m</span>
+        <p className="text-gray-700">
+          Niveau observé : <span className="font-semibold">{real.value.toFixed(4)} m</span>
         </p>
       )}
       {pred && pred.value != null && (
-        <p className="text-red-300">
-          Niveau prédit : <span className="font-semibold">{pred.value.toFixed(3)} m</span>
+        <p className="text-red-600">
+          Niveau prédit : <span className="font-semibold">{pred.value.toFixed(4)} m</span>
         </p>
       )}
     </div>
@@ -136,21 +136,21 @@ export default function WaterLevelChart({ observations, predictions, timeRange, 
   }, [observations, predictions, timeRange]);
 
   return (
-    <div className="rounded-xl bg-aiafs-panel/80 border border-slate-700 p-4 shadow-lg">
+    <div className="rounded-xl bg-white border border-gray-200 p-5 shadow-sm">
       {/* En-tête + sélecteur de plage */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
-        <h2 className="text-lg font-semibold text-sky-300">
-          Niveau de la Liane (Historique & Prévisions)
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+        <h2 className="text-lg font-semibold text-gray-900">
+          Niveau de la Liane
         </h2>
         <div className="flex flex-wrap gap-1.5">
           {TIME_RANGES.map((r) => (
             <button
               key={r.key}
               onClick={() => setTimeRange(r.key)}
-              className={`px-3 py-1 rounded-md text-xs font-medium transition-all duration-150 cursor-pointer select-none active:scale-95 ${
+              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-150 cursor-pointer select-none active:scale-95 ${
                 timeRange === r.key
-                  ? "bg-sky-600 text-white shadow-md shadow-sky-600/30 ring-1 ring-sky-400/50"
-                  : "bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-slate-200"
+                  ? "bg-blue-600 text-white shadow-sm"
+                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
               }`}
             >
               {r.label}
@@ -160,19 +160,19 @@ export default function WaterLevelChart({ observations, predictions, timeRange, 
       </div>
 
       {chartData.length === 0 ? (
-        <div className="h-72 flex items-center justify-center text-slate-500 text-sm">
+        <div className="h-72 flex items-center justify-center text-gray-500 text-base">
           Aucune donnée disponible pour cette période.
         </div>
       ) : (
         <div className="h-72 sm:h-80">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={chartData} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" />
+              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
               <XAxis
                 dataKey="timestamp"
                 tickFormatter={(v) => formatAxisLabel(v, timeRange)}
                 stroke="#9ca3af"
-                tick={{ fontSize: 10 }}
+                tick={{ fontSize: 12 }}
                 interval={tickInterval}
                 angle={timeRange === "1w" || timeRange === "all" ? -30 : 0}
                 textAnchor={timeRange === "1w" || timeRange === "all" ? "end" : "middle"}
@@ -180,7 +180,7 @@ export default function WaterLevelChart({ observations, predictions, timeRange, 
               />
               <YAxis
                 stroke="#9ca3af"
-                tick={{ fontSize: 10 }}
+                tick={{ fontSize: 12 }}
                 domain={yDomain}
                 tickFormatter={formatLevelTick}
                 allowDecimals
@@ -189,14 +189,14 @@ export default function WaterLevelChart({ observations, predictions, timeRange, 
                   value: "Niveau (m)",
                   angle: -90,
                   position: "insideLeft",
-                  fill: "#9ca3af",
-                  fontSize: 11,
+                  fill: "#6b7280",
+                  fontSize: 13,
                   offset: 5,
                 }}
               />
               <Tooltip content={<CustomTooltip />} />
               <Legend
-                wrapperStyle={{ fontSize: 11 }}
+                wrapperStyle={{ fontSize: 13 }}
                 formatter={(value) =>
                   value === "historicalLevel" ? "Niveau observé" : "Niveau prédit"
                 }
@@ -205,8 +205,8 @@ export default function WaterLevelChart({ observations, predictions, timeRange, 
               <Line
                 type="monotone"
                 dataKey="historicalLevel"
-                stroke="#38bdf8"
-                strokeWidth={1.5}
+                stroke="#2563eb"
+                strokeWidth={2}
                 dot={false}
                 name="Niveau observé"
                 connectNulls={false}
@@ -214,7 +214,7 @@ export default function WaterLevelChart({ observations, predictions, timeRange, 
               <Line
                 type="monotone"
                 dataKey="predictedLevel"
-                stroke="#ef4444"
+                stroke="#dc2626"
                 strokeWidth={2.5}
                 dot={false}
                 strokeDasharray="4 4"
@@ -226,13 +226,13 @@ export default function WaterLevelChart({ observations, predictions, timeRange, 
                 y={3.0}
                 stroke="#f97316"
                 strokeDasharray="3 3"
-                label={{ value: "3.0 m (Vigilance)", position: "right", fill: "#f97316", fontSize: 10 }}
+                label={{ value: "3.0 m (Vigilance)", position: "right", fill: "#f97316", fontSize: 12 }}
               />
               <ReferenceLine
                 y={3.8}
                 stroke="#ef4444"
                 strokeDasharray="3 3"
-                label={{ value: "3.8 m (Alerte)", position: "right", fill: "#ef4444", fontSize: 10 }}
+                label={{ value: "3.8 m (Alerte)", position: "right", fill: "#ef4444", fontSize: 12 }}
               />
             </LineChart>
           </ResponsiveContainer>

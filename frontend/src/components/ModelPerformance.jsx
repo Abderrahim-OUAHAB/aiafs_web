@@ -45,166 +45,126 @@ export default function ModelPerformance() {
 
   if (loading) {
     return (
-      <div className="rounded-xl bg-aiafs-panel/80 border border-slate-700 p-4 shadow-lg">
-        <p className="text-slate-400 text-sm">Chargement des infos du modèle...</p>
+      <div className="bg-white rounded-xl border border-gray-200 p-8 text-center">
+        <div className="w-8 h-8 border-3 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+        <p className="text-gray-600 text-base">Chargement des infos du modèle...</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="rounded-xl bg-red-950/40 border border-red-500/60 p-4 shadow-lg">
-        <p className="text-red-200 text-sm">{error}</p>
+      <div className="bg-red-50 rounded-xl border border-red-200 p-6">
+        <p className="text-red-600 text-base">{error}</p>
       </div>
     );
   }
 
   return (
-    <div className="rounded-xl bg-aiafs-panel/80 border border-slate-700 p-4 shadow-lg">
-      <h2 className="text-lg font-semibold mb-4 text-sky-300">
-        📊 Modèle AI - Random Forest
-      </h2>
+    <div className="space-y-6 max-w-7xl mx-auto">
+      <div>
+        <h1 className="text-3xl font-bold text-gray-900">Modèle IA – Random Forest</h1>
+        <p className="text-base text-gray-700 mt-1">
+          Performance, features et comparaisons du modèle de prédiction.
+        </p>
+      </div>
 
       {/* Tabs */}
-      <div className="flex gap-2 mb-4 border-b border-slate-700">
-        <button
-          onClick={() => setActiveTab("performance")}
-          className={`px-3 py-2 text-sm font-medium transition-colors ${
-            activeTab === "performance"
-              ? "text-sky-300 border-b-2 border-sky-300"
-              : "text-slate-400 hover:text-slate-300"
-          }`}
-        >
-          Performance
-        </button>
-        <button
-          onClick={() => setActiveTab("features")}
-          className={`px-3 py-2 text-sm font-medium transition-colors ${
-            activeTab === "features"
-              ? "text-sky-300 border-b-2 border-sky-300"
-              : "text-slate-400 hover:text-slate-300"
-          }`}
-        >
-          Features Importance
-        </button>
-        <button
-          onClick={() => setActiveTab("comparisons")}
-          className={`px-3 py-2 text-sm font-medium transition-colors ${
-            activeTab === "comparisons"
-              ? "text-sky-300 border-b-2 border-sky-300"
-              : "text-slate-400 hover:text-slate-300"
-          }`}
-        >
-          Comparaisons
-        </button>
+      <div className="flex gap-1 bg-gray-100 rounded-lg p-1 w-fit">
+        {[
+          { key: "performance", label: "Performance" },
+          { key: "features", label: "Features" },
+          { key: "comparisons", label: "Comparaisons" },
+        ].map((tab) => (
+          <button
+            key={tab.key}
+            onClick={() => setActiveTab(tab.key)}
+            className={`px-4 py-2 text-base font-medium rounded-md transition-colors ${
+              activeTab === tab.key
+                ? "bg-white text-gray-900 shadow-sm"
+                : "text-gray-600 hover:text-gray-800"
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
       </div>
 
       {/* Performance Tab */}
       {activeTab === "performance" && performance && (
         <div className="space-y-4">
-          <div className="p-3 rounded-lg bg-slate-900/60 border border-slate-700/60">
-            <p className="text-slate-400 text-xs mb-1">Modèle</p>
-            <p className="text-sm font-semibold text-sky-300">
-              {performance.model}
-            </p>
+          <div className="grid sm:grid-cols-2 gap-4">
+            <div className="bg-white rounded-xl border border-gray-200 p-4">
+              <p className="text-base text-gray-700 mb-1">Modèle</p>
+              <p className="text-xl font-semibold text-gray-900">{performance.model}</p>
+            </div>
+            <div className="bg-white rounded-xl border border-gray-200 p-4">
+              <p className="text-base text-gray-700 mb-1">Horizon</p>
+              <p className="text-xl font-semibold text-blue-600">{performance.horizon}</p>
+            </div>
           </div>
 
-          <div className="p-3 rounded-lg bg-slate-900/60 border border-slate-700/60">
-            <p className="text-slate-400 text-xs mb-1">Horizon de prédiction</p>
-            <p className="text-sm font-semibold text-amber-300">
-              {performance.horizon}
-            </p>
-          </div>
-
-          <div className="space-y-2">
-            <p className="text-slate-400 text-xs font-semibold">
-              Métriques de performance
-            </p>
-            <div className="grid grid-cols-2 gap-2">
-              <div className="p-2 rounded bg-slate-900/40 border border-slate-700/40">
-                <p className="text-slate-500 text-xs">R² Score</p>
-                <p className="text-lg font-bold text-emerald-400">
-                  {performance.metrics.r2_score}
-                </p>
+          <div className="bg-white rounded-xl border border-gray-200 p-5">
+            <h3 className="text-base font-semibold text-gray-900 mb-3">Métriques</h3>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="p-3 rounded-lg bg-gray-50">
+                <p className="text-base text-gray-700">R² Score</p>
+                <p className="text-3xl font-bold text-green-600">{performance.metrics.r2_score}</p>
               </div>
-              <div className="p-2 rounded bg-slate-900/40 border border-slate-700/40">
-                <p className="text-slate-500 text-xs">Confiance</p>
-                <p className="text-lg font-bold text-emerald-400">
-                  {performance.metrics.confidence}
-                </p>
+              <div className="p-3 rounded-lg bg-gray-50">
+                <p className="text-base text-gray-700">Confiance</p>
+                <p className="text-3xl font-bold text-green-600">{performance.metrics.confidence}</p>
               </div>
             </div>
           </div>
 
-          <div className="space-y-2">
-            <p className="text-slate-400 text-xs font-semibold">
-              Avantages du Random Forest
-            </p>
-            <ul className="space-y-1">
+          <div className="bg-white rounded-xl border border-gray-200 p-5">
+            <h3 className="text-base font-semibold text-gray-900 mb-3">Avantages</h3>
+            <ul className="space-y-2">
               {performance.model_characteristics.advantages.map((adv, i) => (
-                <li key={i} className="text-xs text-slate-300 flex gap-2">
-                  <span className="text-emerald-400 mt-0.5">✓</span>
+                <li key={i} className="text-base text-gray-700 flex gap-2">
+                  <span className="text-green-500 mt-0.5">&#10003;</span>
                   <span>{adv}</span>
                 </li>
               ))}
             </ul>
           </div>
 
-          <div className="p-3 rounded-lg bg-slate-900/60 border border-slate-700/60">
-            <p className="text-slate-400 text-xs mb-2 font-semibold">
-              Contribution des Features
-            </p>
-            <div className="space-y-1 text-xs">
-              <div>
-                <span className="text-amber-400 font-semibold">
-                  Primaire :
-                </span>{" "}
-                <span className="text-slate-300">
-                  {
-                    performance.feature_contribution.most_important
-                  }
-                </span>
+          <div className="bg-white rounded-xl border border-gray-200 p-5">
+            <h3 className="text-base font-semibold text-gray-900 mb-3">Contribution des Features</h3>
+            <div className="space-y-2 text-base">
+              <div className="flex justify-between py-2 px-3 bg-gray-50 rounded-lg">
+                <span className="text-gray-700">Primaire</span>
+                <span className="font-medium text-gray-900">{performance.feature_contribution.most_important}</span>
               </div>
-              <div>
-                <span className="text-orange-400 font-semibold">
-                  Secondaire :
-                </span>{" "}
-                <span className="text-slate-300">
-                  {performance.feature_contribution.secondary}
-                </span>
+              <div className="flex justify-between py-2 px-3 bg-gray-50 rounded-lg">
+                <span className="text-gray-700">Secondaire</span>
+                <span className="font-medium text-gray-900">{performance.feature_contribution.secondary}</span>
               </div>
-              <div>
-                <span className="text-red-400 font-semibold">Tertiaire :</span>{" "}
-                <span className="text-slate-300">
-                  {performance.feature_contribution.tertiary}
-                </span>
+              <div className="flex justify-between py-2 px-3 bg-gray-50 rounded-lg">
+                <span className="text-gray-700">Tertiaire</span>
+                <span className="font-medium text-gray-900">{performance.feature_contribution.tertiary}</span>
               </div>
             </div>
           </div>
         </div>
       )}
 
-      {/* Features Importance Tab */}
+      {/* Features Tab */}
       {activeTab === "features" && modelInfo?.feature_importance && (
-        <div className="space-y-3">
-          <div className="p-3 rounded-lg bg-blue-950/30 border border-blue-700/30">
-            <p className="text-blue-300 text-xs font-semibold mb-2">
-              🔥 Top 5 Features les Plus Importantes
-            </p>
-            <div className="space-y-2">
+        <div className="space-y-4">
+          <div className="bg-white rounded-xl border border-gray-200 p-5">
+            <h3 className="text-base font-semibold text-gray-900 mb-4">Top 5 Features</h3>
+            <div className="space-y-3">
               {modelInfo.top_5_features.map((feat, i) => (
                 <div key={i} className="space-y-1">
-                  <div className="flex justify-between items-center text-xs">
-                    <span className="text-slate-300 font-medium">
-                      {i + 1}. {feat.feature}
-                    </span>
-                    <span className="text-emerald-400 font-semibold">
-                      {feat.importance_percent}%
-                    </span>
+                  <div className="flex justify-between items-center text-base">
+                    <span className="text-gray-800 font-medium">{i + 1}. {feat.feature}</span>
+                    <span className="text-blue-600 font-semibold">{feat.importance_percent}%</span>
                   </div>
-                  <div className="w-full bg-slate-700/50 rounded-full h-1.5 overflow-hidden">
+                  <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
                     <div
-                      className="bg-gradient-to-r from-sky-500 to-emerald-500 h-full"
+                      className="bg-blue-500 h-full rounded-full"
                       style={{ width: `${feat.importance_percent}%` }}
                     />
                   </div>
@@ -212,56 +172,43 @@ export default function ModelPerformance() {
               ))}
             </div>
           </div>
-
-          <p className="text-slate-400 text-xs">
-            Ces features représentent les variables qui influencent le plus les
-            prédictions du modèle Random Forest pour l'horizon 5 heures.
+          <p className="text-base text-gray-600 px-1">
+            Variables qui influencent le plus les prédictions Random Forest sur l'horizon 5h.
           </p>
         </div>
       )}
 
       {/* Comparisons Tab */}
       {activeTab === "comparisons" && comparisons && (
-        <div className="space-y-3">
-          <div className="p-3 rounded-lg bg-emerald-950/30 border border-emerald-700/30">
-            <p className="text-emerald-300 text-xs font-semibold mb-3">
-              ✓ Modèle Sélectionné : {comparisons.selected_model}
+        <div className="space-y-4">
+          <div className="bg-green-50 rounded-xl border border-green-200 p-5">
+            <p className="text-base font-semibold text-green-800 mb-2">
+              Modèle sélectionné : {comparisons.selected_model}
             </p>
-            <div className="space-y-2">
-              {comparisons.selection_criteria.map((criteria, i) => (
-                <div key={i} className="text-xs text-emerald-200 flex gap-2">
-                  <span className="text-emerald-400">•</span>
-                  <span>{criteria}</span>
-                </div>
+            <ul className="space-y-1">
+              {comparisons.selection_criteria.map((c, i) => (
+                <li key={i} className="text-base text-green-700 flex gap-2">
+                  <span>&#8226;</span>
+                  <span>{c}</span>
+                </li>
               ))}
-            </div>
+            </ul>
           </div>
 
-          <div className="space-y-2">
-            <p className="text-slate-400 text-xs font-semibold">
-              Comparaison avec d'autres modèles
-            </p>
+          <div className="space-y-3">
             {comparisons.comparison.map((comp, i) => (
               <div
                 key={i}
-                className={`p-2 rounded border text-xs ${
-                  comp.model === "Random Forest"
-                    ? "bg-emerald-950/30 border-emerald-700/30"
-                    : "bg-slate-900/40 border-slate-700/40"
+                className={`bg-white rounded-xl border p-4 ${
+                  comp.model === "Random Forest" ? "border-blue-200 bg-blue-50/30" : "border-gray-200"
                 }`}
               >
-                <div className="flex justify-between items-start mb-1">
-                  <div>
-                    <p className="font-semibold text-slate-200">
-                      {comp.model}
-                    </p>
-                    <p className="text-slate-400">{comp.reason}</p>
-                  </div>
-                  <span className="text-slate-400">{comp.status}</span>
+                <div className="flex items-center justify-between mb-1">
+                  <p className="font-semibold text-gray-900 text-base">{comp.model}</p>
+                  <span className="text-base text-gray-600">{comp.status}</span>
                 </div>
-                <div className="flex gap-3 text-slate-300">
-                  <span>R² {comp.r2_score}</span>
-                </div>
+                <p className="text-base text-gray-700 mb-2">{comp.reason}</p>
+                <span className="text-base font-medium text-blue-600">R² {comp.r2_score}</span>
               </div>
             ))}
           </div>

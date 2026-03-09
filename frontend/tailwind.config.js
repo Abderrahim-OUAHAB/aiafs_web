@@ -7,12 +7,14 @@ export default {
   theme: {
     extend: {
       colors: {
-        "aiafs-bg": "#050816",
-        "aiafs-panel": "#0f172a",
-        "aiafs-accent": "#38bdf8",
-        "aiafs-danger": "#ef4444",
-        "aiafs-warning": "#f97316",
-        "aiafs-safe": "#22c55e",
+        "aiafs-bg": "#f8fafc",
+        "aiafs-panel": "#ffffff",
+        "aiafs-accent": "#2563eb",
+        "aiafs-danger": "#dc2626",
+        "aiafs-warning": "#f59e0b",
+        "aiafs-safe": "#16a34a",
+        "aiafs-sidebar": "#1e293b",
+        "aiafs-hero": "#0f172a",
       },
     },
   },

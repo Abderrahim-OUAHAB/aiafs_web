@@ -38,7 +38,7 @@ export default function StationMap({
     if (predictions && predictions.length > 0) {
       const data = predictions.map((p, idx) => ({
         time: `T+${idx + 1}h`,
-        level: parseFloat(p.predicted_niveau_cours_eau_m.toFixed(3)),
+        level: parseFloat(p.predicted_niveau_cours_eau_m.toFixed(4)),
       }));
       setTrendData(data);
     }
@@ -48,8 +48,8 @@ export default function StationMap({
   useEffect(() => {
     if (!mapRef.current || leafletMapRef.current) return;
 
-    // Coordonnées de La Liane, Nouvelle-Aquitaine (Arcachon)
-    const mapCenter = [44.6634, -1.1754];
+    // Coordonnées de la station La Selle, La Liane – Boulogne-sur-Mer
+    const mapCenter = [50.6753, 1.6394];
 
     // Créer la carte
     const map = L.map(mapRef.current).setView(mapCenter, 12);
@@ -84,7 +84,7 @@ export default function StationMap({
             box-shadow: 0 0 10px rgba(0,0,0,0.3);
             cursor: pointer;
           ">
-            ${currentLevel != null ? currentLevel.toFixed(2) : "N/A"}
+            ${currentLevel != null ? currentLevel.toFixed(4) : "N/A"}
           </div>
         `,
         iconSize: [50, 50],
@@ -93,45 +93,44 @@ export default function StationMap({
       });
     };
 
-    // Station principale - La Liane
+    // Station principale – La Selle (La Liane)
     const mainMarker = L.marker(mapCenter, {
       icon: stationIcon(stationStatus),
     })
       .addTo(map)
       .bindPopup(
         `<div style="text-align: center; padding: 10px;">
-          <strong>Station La Liane</strong><br/>
-          Niveau: ${currentLevel != null ? currentLevel.toFixed(2) : "N/A"} m<br/>
+          <strong>Station La Selle</strong><br/>
+          Cours d'eau : La Liane<br/>
+          Niveau: ${currentLevel != null ? currentLevel.toFixed(4) : "N/A"} m<br/>
           Status: ${stationStatus.toUpperCase()}<br/>
           <small>Station Principale</small>
         </div>`
       );
 
-    // Ajouter une deuxième station (amont)
-    const amontMarker = L.marker([44.7234, -1.1854], {
+    // Station amont – Pont-de-Briques
+    const amontMarker = L.marker([50.6930, 1.6220], {
       icon: stationIcon("normal"),
     })
       .addTo(map)
       .bindPopup(
         `<div style="text-align: center; padding: 10px;">
           <strong>Station Amont</strong><br/>
-          Niveau: 2.8 m<br/>
-          Status: NORMAL<br/>
-          <small>Amont</small>
+          Pont-de-Briques<br/>
+          <small>Amont – La Liane</small>
         </div>`
       );
 
-    // Ajouter une troisième station (aval)
-    const avalMarker = L.marker([44.6034, -1.1654], {
+    // Station aval – Boulogne-sur-Mer (embouchure)
+    const avalMarker = L.marker([50.7260, 1.6130], {
       icon: stationIcon("normal"),
     })
       .addTo(map)
       .bindPopup(
         `<div style="text-align: center; padding: 10px;">
           <strong>Station Aval</strong><br/>
-          Niveau: 3.1 m<br/>
-          Status: NORMAL<br/>
-          <small>Aval</small>
+          Boulogne-sur-Mer<br/>
+          <small>Aval – Embouchure La Liane</small>
         </div>`
       );
 
@@ -163,24 +162,24 @@ export default function StationMap({
     switch (stationStatus) {
       case "alerte":
         return {
-          bg: "bg-red-950/30",
-          border: "border-red-600",
+          bg: "bg-red-50",
+          border: "border-red-400",
           dot: "bg-red-500",
-          text: "text-red-400",
+          text: "text-red-600",
         };
       case "vigilance":
         return {
-          bg: "bg-amber-950/30",
-          border: "border-amber-600",
+          bg: "bg-amber-50",
+          border: "border-amber-400",
           dot: "bg-amber-500",
-          text: "text-amber-400",
+          text: "text-amber-600",
         };
       default:
         return {
-          bg: "bg-emerald-950/30",
-          border: "border-emerald-600",
+          bg: "bg-emerald-50",
+          border: "border-emerald-400",
           dot: "bg-emerald-500",
-          text: "text-emerald-400",
+          text: "text-emerald-600",
         };
     }
   };
@@ -188,11 +187,11 @@ export default function StationMap({
   const getStatusLabel = () => {
     switch (stationStatus) {
       case "alerte":
-        return { text: "🔴 ALERTE CRUE", color: "text-red-400", icon: "🚨" };
+        return { text: "🔴 ALERTE CRUE", color: "text-red-600", icon: "🚨" };
       case "vigilance":
-        return { text: "🟠 VIGILANCE", color: "text-amber-400", icon: "⚠️" };
+        return { text: "🟠 VIGILANCE", color: "text-amber-600", icon: "⚠️" };
       default:
-        return { text: "✅ SITUATION NORMALE", color: "text-emerald-400", icon: "✓" };
+        return { text: "✅ SITUATION NORMALE", color: "text-emerald-600", icon: "✓" };
     }
   };
 
@@ -208,37 +207,37 @@ export default function StationMap({
   return (
     <div className="space-y-6">
       {/* CARTE HYDROLOGIQUE PROFESSIONNELLE */}
-      <div className="rounded-xl bg-aiafs-panel/80 border border-slate-700 p-6 shadow-lg">
-        <h3 className="text-lg font-semibold text-sky-300 mb-4">🗺️ Carte Hydrologique - La Liane</h3>
+      <div className="rounded-xl bg-white border border-gray-200 p-6 shadow-sm">
+        <h3 className="text-xl font-semibold text-blue-600 mb-4">🗺️ Carte Hydrologique – Station La Selle (La Liane)</h3>
         
         {/* Carte Leaflet */}
         <div
           ref={mapRef}
-          className="w-full rounded-lg overflow-hidden border border-slate-700 shadow-lg"
+          className="w-full rounded-lg overflow-hidden border border-gray-200 shadow-sm"
           style={{ height: "500px", minHeight: "500px" }}
         />
 
         {/* Stats détaillées sous la carte */}
-        <div className="grid grid-cols-4 gap-3 text-xs mt-6">
-          <div className="p-3 rounded-lg bg-slate-900/40 border border-slate-700/60">
-            <p className="text-slate-400 mb-1">📊 Niveau Actuel</p>
-            <p className="text-lg font-bold text-sky-300">{currentLevel?.toFixed(2)}m</p>
+        <div className="grid grid-cols-4 gap-3 text-base mt-6">
+          <div className="p-3 rounded-lg bg-gray-50 border border-gray-200">
+            <p className="text-gray-700 mb-1">📊 Niveau Actuel</p>
+            <p className="text-xl font-bold text-blue-600">{currentLevel?.toFixed(4)}m</p>
           </div>
-          <div className="p-3 rounded-lg bg-slate-900/40 border border-slate-700/60">
-            <p className="text-slate-400 mb-1">📈 Pic 5h</p>
-            <p className="text-lg font-bold text-amber-300">{maxPredicted?.toFixed(2)}m</p>
+          <div className="p-3 rounded-lg bg-gray-50 border border-gray-200">
+            <p className="text-gray-700 mb-1">📈 Pic 5h</p>
+            <p className="text-xl font-bold text-amber-600">{maxPredicted?.toFixed(4)}m</p>
           </div>
-          <div className="p-3 rounded-lg bg-slate-900/40 border border-slate-700/60">
-            <p className="text-slate-400 mb-1">🔺 Min 5h</p>
-            <p className="text-lg font-bold text-sky-300">
-              {trendData.length > 0 ? Math.min(...trendData.map((d) => d.level)).toFixed(2) : "N/A"}m
+          <div className="p-3 rounded-lg bg-gray-50 border border-gray-200">
+            <p className="text-gray-700 mb-1">🔺 Min 5h</p>
+            <p className="text-xl font-bold text-blue-600">
+              {trendData.length > 0 ? Math.min(...trendData.map((d) => d.level)).toFixed(4) : "N/A"}m
             </p>
           </div>
-          <div className="p-3 rounded-lg bg-slate-900/40 border border-slate-700/60">
-            <p className="text-slate-400 mb-1">📊 Moy 5h</p>
-            <p className="text-lg font-bold text-slate-300">
+          <div className="p-3 rounded-lg bg-gray-50 border border-gray-200">
+            <p className="text-gray-700 mb-1">📊 Moy 5h</p>
+            <p className="text-xl font-bold text-gray-700">
               {trendData.length > 0
-                ? (trendData.reduce((sum, d) => sum + d.level, 0) / trendData.length).toFixed(2)
+                ? (trendData.reduce((sum, d) => sum + d.level, 0) / trendData.length).toFixed(4)
                 : "N/A"}m
             </p>
           </div>
@@ -247,21 +246,21 @@ export default function StationMap({
 
       {/* TENDANCE 5H AVEC GRAPHIQUE */}
       {trendData.length > 0 && (
-        <div className="rounded-xl bg-aiafs-panel/80 border border-slate-700 p-6 shadow-lg">
-          <h3 className="text-lg font-semibold text-sky-300 mb-4">📊 Tendance 5 Heures</h3>
+        <div className="rounded-xl bg-white border border-gray-200 p-6 shadow-sm">
+          <h3 className="text-xl font-semibold text-blue-600 mb-4">📊 Tendance 5 Heures</h3>
           <div className="h-48">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={trendData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#475569" />
-                <XAxis dataKey="time" stroke="#94a3b8" />
-                <YAxis stroke="#94a3b8" domain={[2.8, 4]} />
+                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                <XAxis dataKey="time" stroke="#6b7280" />
+                <YAxis stroke="#6b7280" domain={[2.8, 4]} />
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: "#1e293b",
-                    border: "1px solid #475569",
+                    backgroundColor: "#ffffff",
+                    border: "1px solid #e5e7eb",
                     borderRadius: "8px",
                   }}
-                  labelStyle={{ color: "#e0f2fe" }}
+                  labelStyle={{ color: "#1f2937" }}
                 />
                 <Line
                   type="monotone"
@@ -296,18 +295,18 @@ export default function StationMap({
               </LineChart>
             </ResponsiveContainer>
           </div>
-          <div className="flex gap-6 mt-4 text-xs">
+          <div className="flex gap-6 mt-4 text-sm">
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 rounded-full bg-amber-500"></div>
-              <span className="text-slate-300">Prédictions RF</span>
+              <span className="text-gray-600">Prédictions RF</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-2 h-[2px] bg-orange-500"></div>
-              <span className="text-slate-300">Seuil Vigilance</span>
+              <span className="text-gray-600">Seuil Vigilance</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-2 h-[2px] bg-red-500"></div>
-              <span className="text-slate-300">Seuil Alerte</span>
+              <span className="text-gray-600">Seuil Alerte</span>
             </div>
           </div>
         </div>
@@ -316,28 +315,32 @@ export default function StationMap({
       {/* INFOS ET RECOMMANDATIONS */}
       <div className="grid grid-cols-2 gap-6">
         {/* Infos techniques */}
-        <div className="rounded-xl bg-aiafs-panel/80 border border-slate-700 p-6 shadow-lg">
-          <h3 className="text-lg font-semibold text-sky-300 mb-4">🔧 Informations Techniques</h3>
-          <div className="space-y-3 text-sm">
-            <div className="flex justify-between p-2 rounded bg-slate-900/40">
-              <span className="text-slate-400">Cours d'eau</span>
-              <span className="font-semibold text-sky-300">La Liane</span>
+        <div className="rounded-xl bg-white border border-gray-200 p-6 shadow-sm">
+          <h3 className="text-xl font-semibold text-blue-600 mb-4">🔧 Informations Techniques</h3>
+          <div className="space-y-3 text-base">
+            <div className="flex justify-between p-2 rounded bg-gray-50">
+              <span className="text-gray-700">Station</span>
+              <span className="font-semibold text-blue-600">La Selle</span>
             </div>
-            <div className="flex justify-between p-2 rounded bg-slate-900/40">
-              <span className="text-slate-400">Région</span>
-              <span className="font-semibold text-sky-300">Nouvelle-Aquitaine</span>
+            <div className="flex justify-between p-2 rounded bg-gray-50">
+              <span className="text-gray-700">Cours d'eau</span>
+              <span className="font-semibold text-blue-600">La Liane</span>
             </div>
-            <div className="flex justify-between p-2 rounded bg-slate-900/40">
-              <span className="text-slate-400">Modèle</span>
-              <span className="font-semibold text-sky-300">Random Forest</span>
+            <div className="flex justify-between p-2 rounded bg-gray-50">
+              <span className="text-gray-700">Région</span>
+              <span className="font-semibold text-blue-600">Hauts-de-France (Boulogne-sur-Mer)</span>
             </div>
-            <div className="flex justify-between p-2 rounded bg-slate-900/40">
-              <span className="text-slate-400">Horizon</span>
-              <span className="font-semibold text-sky-300">5 heures</span>
+            <div className="flex justify-between p-2 rounded bg-gray-50">
+              <span className="text-gray-700">Modèle</span>
+              <span className="font-semibold text-blue-600">Random Forest</span>
             </div>
-            <div className="flex justify-between p-2 rounded bg-slate-900/40">
-              <span className="text-slate-400">Mise à jour</span>
-              <span className="font-semibold text-emerald-300">
+            <div className="flex justify-between p-2 rounded bg-gray-50">
+              <span className="text-gray-700">Horizon</span>
+              <span className="font-semibold text-blue-600">5 heures</span>
+            </div>
+            <div className="flex justify-between p-2 rounded bg-gray-50">
+              <span className="text-gray-700">Mise à jour</span>
+              <span className="font-semibold text-emerald-600">
                 {lastUpdate ? lastUpdate.toLocaleTimeString("fr-FR") : "N/A"}
               </span>
             </div>
@@ -349,7 +352,7 @@ export default function StationMap({
           <h3 className={`text-lg font-semibold ${colors.text} mb-4`}>
             {stationStatus === "alerte" ? "🚨 Actions Recommandées" : "💡 Informations"}
           </h3>
-          <div className="space-y-2 text-sm text-slate-300">
+          <div className="space-y-2 text-base text-gray-700">
             {stationStatus === "alerte" && (
               <>
                 <p>✓ Activez les plans de prévention</p>

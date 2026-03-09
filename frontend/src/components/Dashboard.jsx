@@ -1,8 +1,8 @@
 import React from "react";
 import WaterLevelChart from "./WaterLevelChart.jsx";
 import AlertPanel from "./AlertPanel.jsx";
-import ForecastDetails from "./ForecastDetails.jsx";
-import ValvePiloting from "./ValvePiloting.jsx";
+import { Link } from "react-router-dom";
+import { Activity, Gauge, TrendingUp, Droplets } from "lucide-react";
 
 export default function Dashboard({
   observations,
@@ -28,79 +28,106 @@ export default function Dashboard({
       : null;
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <header className="border-b border-slate-800 bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950">
-        <div className="max-w-6xl mx-auto px-4 py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">
-              AIAFS Dashboard
-            </h1>
-            <p className="text-sm text-slate-400">
-              Artificial Intelligence Anti-Flood System – La Liane
-            </p>
-          </div>
-          <div className="flex items-center gap-3 text-xs text-slate-400">
-            {isLoading && (
-              <span className="inline-flex items-center gap-1">
-                <span className="h-2 w-2 rounded-full bg-sky-400 animate-pulse" />
-                <span>Mise à jour des données…</span>
-              </span>
-            )}
-            {lastUpdate && (
-              <span className="inline-flex items-center gap-1">
-                <span className="h-2 w-2 rounded-full bg-emerald-400" />
-                <span>
-                  Dernière mise à jour :{" "}
-                  {lastUpdate.toLocaleTimeString("fr-FR", {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                    second: "2-digit",
-                  })}
-                </span>
-              </span>
-            )}
-          </div>
+    <div className="space-y-6 max-w-7xl mx-auto">
+      {/* Status bar */}
+      <div className="flex flex-wrap items-center gap-3 text-base text-gray-700">
+        {isLoading && (
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-blue-50 text-blue-600 rounded-full">
+            <span className="h-1.5 w-1.5 rounded-full bg-blue-500 animate-pulse" />
+            Mise à jour…
+          </span>
+        )}
+        {lastUpdate && (
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-green-50 text-green-600 rounded-full">
+            <span className="h-1.5 w-1.5 rounded-full bg-green-500" />
+            Mise à jour : {lastUpdate.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
+          </span>
+        )}
+      </div>
+
+      {error && (
+        <div className="rounded-lg border border-red-200 bg-red-50 text-red-700 text-sm px-4 py-3">
+          {error}
         </div>
-      </header>
+      )}
 
-      <main className="flex-1 bg-gradient-to-b from-slate-950 via-slate-950 to-slate-900">
-        <div className="max-w-7xl mx-auto px-4 py-8 space-y-6">
-          {error && (
-            <div className="rounded-lg border border-red-500/60 bg-red-950/40 text-red-200 text-sm px-4 py-3 backdrop-blur-sm">
-              {error}
-            </div>
-          )}
+      {/* Quick stats */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <QuickStat
+          icon={<Droplets className="w-4 h-4 text-blue-500" />}
+          label="Niveau Actuel"
+          value={currentLevel != null ? `${currentLevel.toFixed(4)} m` : "N/A"}
+          bg="bg-blue-50"
+        />
+        <QuickStat
+          icon={<TrendingUp className="w-4 h-4 text-amber-500" />}
+          label="Max Prévu (5h)"
+          value={maxPredicted != null ? `${maxPredicted.toFixed(4)} m` : "N/A"}
+          bg="bg-amber-50"
+        />
+        <QuickStat
+          icon={<Activity className="w-4 h-4 text-green-500" />}
+          label="Observations"
+          value={observations.length}
+          bg="bg-green-50"
+        />
+        <QuickStat
+          icon={<Gauge className="w-4 h-4 text-purple-500" />}
+          label="Prédictions"
+          value={predictions.length}
+          bg="bg-purple-50"
+        />
+      </div>
 
-          {/* Main chart and alert panel */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2">
-              <WaterLevelChart
-                observations={observations}
-                predictions={predictions}
-                timeRange={timeRange}
-                setTimeRange={setTimeRange}
-              />
-            </div>
-            <div className="lg:col-span-1">
-              <AlertPanel
-                currentLevel={currentLevel}
-                maxPredicted={maxPredicted}
-              />
-            </div>
-          </div>
-
-          {/* Forecast Details */}
-          <div>
-            <ForecastDetails predictions={predictions} />
-          </div>
-
-          {/* Pilotage des Vannes */}
-          <div>
-            <ValvePiloting />
-          </div>
+      {/* Main chart + alert */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2">
+          <WaterLevelChart
+            observations={observations}
+            predictions={predictions}
+            timeRange={timeRange}
+            setTimeRange={setTimeRange}
+          />
         </div>
-      </main>
+        <div className="lg:col-span-1">
+          <AlertPanel
+            currentLevel={currentLevel}
+            maxPredicted={maxPredicted}
+          />
+        </div>
+      </div>
+
+      {/* Quick nav cards */}
+      <div className="grid sm:grid-cols-3 gap-4">
+        <NavCard to="/forecasts" title="Prévisions Horaires" desc="Détail des prédictions T+1h à T+5h" color="text-blue-600 bg-blue-50" />
+        <NavCard to="/valves" title="Pilotage des Vannes" desc="Contrôle automatique et manuel" color="text-amber-600 bg-amber-50" />
+        <NavCard to="/simulation" title="Simulation de Crues" desc="Tester des scénarios d'inondation" color="text-purple-600 bg-purple-50" />
+      </div>
     </div>
+  );
+}
+
+function QuickStat({ icon, label, value, bg }) {
+  return (
+    <div className="bg-white rounded-xl border border-gray-200 p-4">
+      <div className="flex items-center gap-2 mb-2">
+        <div className={`w-8 h-8 rounded-lg ${bg} flex items-center justify-center`}>{icon}</div>
+        <span className="text-base font-medium text-gray-700">{label}</span>
+      </div>
+      <p className="text-3xl font-bold text-gray-900">{value}</p>
+    </div>
+  );
+}
+
+function NavCard({ to, title, desc, color }) {
+  return (
+    <Link
+      to={to}
+      className="block p-4 bg-white rounded-xl border border-gray-200 hover:shadow-md hover:border-gray-300 transition-all group"
+    >
+      <p className={`text-base font-semibold ${color.split(" ")[0]} mb-1`}>{title}</p>
+      <p className="text-base text-gray-700">{desc}</p>
+    </Link>
   );
 }
 
